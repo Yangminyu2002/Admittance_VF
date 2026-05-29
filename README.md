@@ -2,102 +2,123 @@
 
 基于 PSCAD/AIM 频率扫描数据的并网系统导纳稳定性分析与 Vector Fitting 模态识别脚本集。
 
-本项目主要用于读取 dq 坐标系下的 MIMO 导纳数据，计算系统导纳矩阵行列式 `det(Y_LIM)`，再通过 Vector Fitting 提取零点、模态频率和阻尼比，并绘制不同运行参数下的次同步模态迁移图。
+本项目主要用于读取 dq 坐标系下的 MIMO 导纳数据，计算系统导纳矩阵行列式 $\det(Y_{LIM})$，再通过 Vector Fitting 提取零点、模态频率和阻尼比，并绘制不同运行参数（风机数量、风速）下的次同步模态迁移图。
 
 ## 功能概览
 
 - 读取 AIM 导出的 `T1/T2_admittance_dq_MIMO1.txt` 频扫数据。
-- 将幅值 dB、相位角转换为复数导纳。
-- 计算两端导纳叠加后的 `Y_LIM = Y_s + Y_g`。
-- 计算 `det(Y_LIM)` 并输出实部、虚部、幅值和相位。
-- 使用 Vector Fitting 对 `det(Y_LIM)` 进行有理函数拟合。
-- 从拟合模型中提取零点，并计算模态频率和阻尼比。
+- 将幅值（dB）、相位角（deg）转换为复数导纳。
+- 计算两端导纳叠加后的 $Y_{LIM} = Y_s + Y_g$。
+- 计算 $\det(Y_{LIM})$ 并输出实部、虚部、幅值和相位。
+- 绘制 $\det(Y_{LIM})$ Bode 图及 $Y_{LIM}$ MIMO 各分量 Bode 图。
+- 使用 Vector Fitting（支持普通模式和共轭约束模式）对 $\det(Y_{LIM})$ 进行有理函数拟合。
+- 从拟合模型中提取零点，计算模态频率 $f$ 和阻尼比 $\zeta$。
 - 绘制拟合对比图、频率/阻尼变化图和 s 平面零点迁移轨迹。
 
 ## 文件说明
 
 | 文件 | 说明 |
 | --- | --- |
-| `admittance_Ylim.py` | 读取两端 dq 导纳数据，计算 `Y_LIM` 和 `det(Y_LIM)`，绘制 Bode 图并保存结果。 |
-| `Ylim_fitting.py` | 读取 `det_Ylim_results.txt`，执行 Vector Fitting，输出拟合传递函数、零点模态表和拟合对比图。 |
-| `VF_lib.py` | Vector Fitting 核心函数库，包含普通零点提取和共轭约束拟合版本。 |
-| `zero_trajectory_n.py` | 根据不同风机数量 `n` 下的模态识别结果，绘制频率/阻尼变化和 s 平面迁移图。 |
-| `zero_trajectory_vw.py` | 根据不同风速 `vw` 下的模态识别结果，绘制频率/阻尼变化和 s 平面迁移图。 |
+| `admittance_Ylim_fitting.py` | **一体化脚本（推荐）**：读取两端 dq 导纳数据，计算 $Y_{LIM}$ 和 $\det(Y_{LIM})$，绘制 Bode 图，执行 Vector Fitting 并输出模态结果。将计算与拟合步骤合并在一个脚本中。 |
+| `admittance_Ylim.py` | **独立计算脚本**：读取两端 dq 导纳数据，计算 $Y_{LIM}$ 和 $\det(Y_{LIM})$，绘制 Bode 图并保存 `det_Ylim_results.txt`。 |
+| `Ylim_fitting.py` | **独立拟合脚本**：读取 `det_Ylim_results.txt`，执行 Vector Fitting，输出拟合传递函数、零点模态表和拟合对比图。 |
+| `VF_lib.py` | Vector Fitting 核心函数库，包含 `vector_fitting_zeros`（通用模式）和 `vector_fitting_zeros_conjugate`（共轭约束模式）两个版本。 |
+| `zero_trajectory_n.py` | 根据不同风机数量 $n$ 下的模态识别结果，绘制频率/阻尼变化图和 s 平面零点迁移轨迹图。 |
+| `zero_trajectory_vw.py` | 根据不同风速 $v_w$ 下的模态识别结果，绘制频率/阻尼变化图和 s 平面零点迁移轨迹图。 |
 
 ## 环境依赖
 
-建议使用 Python 3.9 或更高版本。
+Python 3.9+，依赖 `numpy`、`pandas`、`matplotlib`。
 
 ```powershell
 pip install numpy pandas matplotlib
 ```
 
-如果使用 Conda，也可以创建独立环境：
+Conda 环境（推荐）：
 
 ```powershell
-conda create -n admittance-vf python=3.11 numpy pandas matplotlib
-conda activate admittance-vf
+conda create -n plot_env python=3.11 numpy pandas matplotlib
+conda activate plot_env
 ```
 
-## 典型使用流程
+## 使用流程
 
-1. 准备 AIM/PSCAD 导出的 dq 导纳频扫文件。
+### 方式一：一体化脚本（推荐）
 
-   输入文件需包含频率列 `fp`，以及以下幅值/相位列：
+直接使用 `admittance_Ylim_fitting.py`，修改脚本顶部的配置参数后运行：
 
-   ```text
-   Ydd_mag Ydd_pha
-   Ydq_mag Ydq_pha
-   Yqd_mag Yqd_pha
-   Yqq_mag Yqq_pha
+```powershell
+python admittance_Ylim_fitting.py
+```
+
+该脚本中的可配置参数：
+
+| 参数 | 说明 |
+| --- | --- |
+| `TERMINAL2_ADMITTANCE_FILE` | Terminal2（源侧）dq 导纳文件路径 |
+| `TERMINAL1_ADMITTANCE_FILE` | Terminal1（电网侧）dq 导纳文件路径 |
+| `OUTPUT_DIR` | 所有输出文件的保存目录 |
+| `N_ORDER` | Vector Fitting 拟合阶数（默认 6） |
+| `FIT_NROWS` | 拟合使用的频率点数（默认 120） |
+| `USE_CONJUGATE_FITTING` | 是否使用共轭约束拟合（默认 `False`） |
+| `SHOW_PLOTS` | 是否显示绘图窗口（默认 `True`） |
+
+### 方式二：分步执行
+
+1. **准备数据**：准备 AIM/PSCAD 导出的 dq 导纳频扫文件。输入文件需包含频率列 `fp`，以及以下幅值/相位列：
+   ```
+   Ydd_mag Ydd_pha  Ydq_mag Ydq_pha
+   Yqd_mag Yqd_pha  Yqq_mag Yqq_pha
    ```
 
-2. 修改 `admittance_Ylim.py` 中的输入路径。
-
-   需要将脚本中的 `T1_admittance_dq_MIMO1.txt` 和 `T2_admittance_dq_MIMO1.txt` 路径改为本机实际数据路径。
-
-3. 计算 `det(Y_LIM)`。
-
+2. **计算 $\det(Y_{LIM})$**：修改 `admittance_Ylim.py` 中的输入路径，运行：
    ```powershell
    python admittance_Ylim.py
    ```
-
-   该步骤会生成类似 `det_Ylim_results.txt` 的结果文件，字段包括：
-
-   ```text
+   生成 `det_Ylim_results.txt`，字段包括：
+   ```
    Frequency_Hz Real_Part Imag_Part Magnitude Phase_deg
    ```
 
-4. 修改 `Ylim_fitting.py` 中的 `det_Ylim_results.txt` 路径，然后执行拟合。
-
+3. **Vector Fitting 拟合**：修改 `Ylim_fitting.py` 中的 `det_Ylim_results.txt` 路径，运行：
    ```powershell
    python Ylim_fitting.py
    ```
-
-   输出内容包括：
-
-   - `VF_fit_TransferFunction_and_Modes.txt`
-   - `VF_fit_plot.png`
+   输出：
+   - `VF_fit_TransferFunction_and_Modes.txt` — 传递函数解析表达式和模态表
+   - `VF_fit_plot.png` — 拟合对比图
    - 控制台打印的零点模态表
 
-5. 绘制参数变化下的模态迁移。
+### 绘制模态迁移图
 
-   将不同工况下生成的 `VF_fit_TransferFunction_and_Modes.txt` 整理为脚本中约定的文件名，例如：
+将不同工况下生成的 `VF_fit_TransferFunction_and_Modes.txt` 整理为约定的文件名格式，然后运行轨迹绘制脚本。
 
-   ```text
-   n=1000.txt
-   n=1250.txt
-   n=1500.txt
-   vw=8.txt
-   vw=8.5.txt
-   ```
+**风机数量 $n$ 变化**（`zero_trajectory_n.py`）：
+- 将各工况文件重命名为 `n=1000.txt`、`n=1250.txt`、`n=1500.txt` 等
+- 修改脚本中的 `data_dir` 为文件所在目录
+- 运行：`python zero_trajectory_n.py`
 
-   然后修改 `zero_trajectory_n.py` 或 `zero_trajectory_vw.py` 中的 `data_dir`，运行：
+**风速 $v_w$ 变化**（`zero_trajectory_vw.py`）：
+- 将各工况文件重命名为 `vw=8.txt`、`vw=8.5.txt`、`vw=9.txt` 等
+- 修改脚本中的 `data_dir` 为文件所在目录
+- 运行：`python zero_trajectory_vw.py`
 
-   ```powershell
-   python zero_trajectory_n.py
-   python zero_trajectory_vw.py
-   ```
+输出图片包括：
+- `fig1_freq_damping_vs_n.png` / `fig1_freq_damping_vs_vw.png` — 频率和阻尼随参数变化的双面板图
+- `fig2_s_plane_trajectory_n.png` / `fig2_s_plane_trajectory_vw.png` — s 平面零点迁移轨迹图
+
+## Vector Fitting 算法说明
+
+`VF_lib.py` 提供两种拟合模式：
+
+| 函数 | 说明 |
+| --- | --- |
+| `vector_fitting_zeros(s, y, n_order)` | 标准 Vector Fitting，采用极点重定位迭代，通过极点-留数模型提取零点。 |
+| `vector_fitting_zeros_conjugate(s, y, n_order)` | 共轭约束版本，强制极点/留数为严格共轭对，常数项 $d$ 为实数，适合物理系统的有理拟合。 |
+
+两种模式均返回：极点 `poles`、零点 `zeros`、拟合曲线 `y_fit`、留数 `residues` 和常数项 `d`。
+
+零点提取基于状态空间法：有理函数 $f(s) = d + \sum \frac{r_i}{s-p_i}$ 的零点为矩阵 $\text{diag}(p_i) - \frac{1}{d} \mathbf{1} \cdot \mathbf{r}^T$ 的特征值。
 
 ## 主要输出
 
