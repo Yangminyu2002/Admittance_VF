@@ -35,8 +35,8 @@ def load_and_convert_to_complex_Y(filename):
 # 1. 加载两个导纳文件数据
 # ==========================================
 # 请确保这里的文件名与你实际的导纳文件名一致
-f, Y_s = load_and_convert_to_complex_Y(r"D:\PSCAD_Learning\AIM_results\testbed_8800MW_Type4&TG\Type4_X=0.3_ip\Measurementdata_Toolbox1\Terminal2\T2_admittance_dq_MIMO1.txt")
-_, Y_g = load_and_convert_to_complex_Y(r'D:\PSCAD_Learning\AIM_results\testbed_8800MW_Type4&TG\Type4_X=0.3_ip\Measurementdata_Toolbox1\Terminal1\T1_admittance_dq_MIMO1.txt')
+f, Y_s = load_and_convert_to_complex_Y(r"testbed_8800MW_Type4&TG\Type4_X=0.3_ip\Measurementdata_Toolbox1\Terminal2\T2_admittance_dq_MIMO1.txt")
+_, Y_g = load_and_convert_to_complex_Y(r'testbed_8800MW_Type4&TG\Type4_X=0.3_ip\Measurementdata_Toolbox1\Terminal1\T1_admittance_dq_MIMO1.txt')
 
 # ==========================================
 # 2. 计算 Y_LIM = Y_s + Y_g
@@ -96,7 +96,7 @@ output_df = pd.DataFrame({
 })
 
 # 保存为以空格分隔的文本文件（不包含索引）
-output_filename = r'D:\PSCAD_Learning\AIM_results\testbed_8800MW_Type4&TG\Type4_X=0.3_ip\det_Ylim_results.txt'
+output_filename = r'testbed_8800MW_Type4&TG\Type4_X=0.3_ip\det_Ylim_results.txt'
 output_df.to_csv(output_filename, sep=' ', index=False, float_format='%.6e')
 
 print(f"结果已成功保存至: {output_filename}")

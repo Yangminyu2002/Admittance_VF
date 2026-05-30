@@ -9,18 +9,14 @@ import VF_lib
 
 # Input files exported by AIM/PSCAD.
 TERMINAL2_ADMITTANCE_FILE = (
-    r"D:\PSCAD_Learning\AIM_results\testbed_8800MW_Type4&TG"
-    r"\Type4_X=0.3_ip\Measurementdata_Toolbox1\Terminal2"
-    r"\T2_admittance_dq_MIMO1.txt"
+r"testbed_8800MW_Type4&TG\Type4_X=0.3_ip\Measurementdata_Toolbox1\Terminal2\T2_admittance_dq_MIMO1.txt"
 )
 TERMINAL1_ADMITTANCE_FILE = (
-    r"D:\PSCAD_Learning\AIM_results\testbed_8800MW_Type4&TG"
-    r"\Type4_X=0.3_ip\Measurementdata_Toolbox1\Terminal1"
-    r"\T1_admittance_dq_MIMO1.txt"
+r"testbed_8800MW_Type4&TG\Type4_X=0.3_ip\Measurementdata_Toolbox1\Terminal1\T1_admittance_dq_MIMO1.txt"
 )
 
 # All output files are written here.
-OUTPUT_DIR = r"D:\PSCAD_Learning\AIM_results\testbed_8800MW_Type4&TG\Type4_X=0.3_ip"
+OUTPUT_DIR = r"testbed_8800MW_Type4&TG\Type4_X=0.3_ip"
 
 # Vector Fitting settings.
 N_ORDER = 6
